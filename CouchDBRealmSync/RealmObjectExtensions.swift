@@ -7,29 +7,28 @@
 //
 
 import Foundation
-import Realm
 import RealmSwift
 
 extension Object {
     
     func toDictionary() -> [String:AnyObject] {
         let properties = self.objectSchema.properties.map { $0.name }
-        let dictionary = self.dictionaryWithValuesForKeys(properties)
+        let dictionary = self.dictionaryWithValues(forKeys: properties)
         
         let mutabledic = NSMutableDictionary()
-        mutabledic.setValuesForKeysWithDictionary(dictionary)
+        mutabledic.setValuesForKeys(dictionary)
         
-        for prop in self.objectSchema.properties as [Property]! {
+        for prop in self.objectSchema.properties {
             // find lists
             if let nestedObject = self[prop.name] as? Object {
                 mutabledic.setValue(nestedObject.toDictionary(), forKey: prop.name)
             } else if let nestedListObject = self[prop.name] as? ListBase {
                 var objects = [AnyObject]()
-                for index in 0..<nestedListObject._rlmArray.count  {
-                    let object = nestedListObject._rlmArray[index] as AnyObject
-                    objects.append(object.toDictionary())
+                for index in 0..<nestedListObject._rlmArray.count {
+                    let object = nestedListObject._rlmArray[index]
+                    objects.append(object)
                 }
-                mutabledic.setObject(objects, forKey: prop.name)
+                mutabledic.setValue(objects, forKey: prop.name)
             }
             
         }
@@ -37,38 +36,37 @@ extension Object {
         var dict = [String:AnyObject]()
         for key in mutabledic.allKeys {
             if let keyStr = key as? String {
-                dict[keyStr] = mutabledic.objectForKey(keyStr)
+                dict[keyStr] = mutabledic.object(forKey: keyStr) as AnyObject
             }
         }
         return dict
     }
     
     func updateFromDictionary(dict: [String:AnyObject]) {
-        let primaryKey = self.dynamicType.primaryKey()
+        let primaryKey = type(of: self).primaryKey()
         var primaryKeyExists = false
         if (primaryKey != nil) {
-            primaryKeyExists = (self.valueForKey(primaryKey!) != nil)
+            primaryKeyExists = (self.value(forKey: primaryKey!) != nil)
         }
-        for prop in self.objectSchema.properties as [Property]! {
+        for prop in self.objectSchema.properties {
             if let value = dict[prop.name] {
                 if let nestedObjectDict = value as? [String:AnyObject] {
                     var nestedObjectIsNew = false
                     var nestedObject = self[prop.name] as? Object
                     if (nestedObject == nil && prop.objectClassName != nil) {
-                        nestedObject = Object.objectClassFromString(prop.objectClassName!)
+                        nestedObject = Object.objectClassFromString(className: prop.objectClassName!)
                         nestedObjectIsNew = true
                     }
                     if (nestedObject != nil) {
-                        nestedObject!.updateFromDictionary(nestedObjectDict)
+                        nestedObject!.updateFromDictionary(dict: nestedObjectDict)
                         if (nestedObjectIsNew) {
                             self.setValue(nestedObject, forKey: prop.name)
                         }
                     }
-                }
-//                else if let nestedObjectArray = value as? [[AnyObject]] {
+//                } else if let nestedObjectArray = value as? [[AnyObject]] {
 //                    // TODO:
 //                }
-                else {
+                } else {
                     if (prop.name == primaryKey) {
                         if (primaryKeyExists == false) {
                             primaryKeyExists = true
@@ -87,15 +85,14 @@ extension Object {
         var clazz = NSClassFromString(className) as? Object.Type
         if (clazz == nil) {
             // get the project name
-            if  let appName: String? = NSBundle.mainBundle().infoDictionary!["CFBundleName"] as? String {
-                let classStringName = "\(appName!).\(className)"
+            if let appName = Bundle.main.infoDictionary?["CFBundleName"] as? String {
+                let classStringName = "\(appName).\(className)"
                 clazz = NSClassFromString(classStringName) as? Object.Type
             }
         }
         if (clazz != nil) {
             return clazz!.init()
-        }
-        else {
+        } else {
             return nil
         }
     }

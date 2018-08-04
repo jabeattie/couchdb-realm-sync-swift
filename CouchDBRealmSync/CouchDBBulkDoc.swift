@@ -35,10 +35,10 @@ public class CouchDBBulkDoc {
         self.doc = doc
     }
     
-    func toDictionary() -> [String:AnyObject] {
-        var dict:[String:AnyObject] = [String:AnyObject]();
-        dict["_id"] = self.docRev.docId
-        dict["_rev"] = self.docRev.revision
+    func toDictionary() -> [String: AnyObject] {
+        var dict: [String: AnyObject] = [String: AnyObject]();
+        dict["_id"] = self.docRev.docId as AnyObject
+        dict["_rev"] = self.docRev.revision as AnyObject
         // TODO: this is not set up properly right now - not sure if even required
         //dict["_revisions"] = self.revisions.toDictionary()
         if (self.doc != nil) {

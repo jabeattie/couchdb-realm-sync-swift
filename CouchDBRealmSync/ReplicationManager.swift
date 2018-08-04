@@ -10,7 +10,7 @@ import Foundation
 import Realm
 import RealmSwift
 
-public enum ReplicationManagerError: ErrorType {
+public enum ReplicationManagerError: Error {
     case PrimaryKeyRequired
 }
 
@@ -29,23 +29,23 @@ public class ReplicationManager {
         if (realmObjectType.primaryKey() == nil) {
             throw ReplicationManagerError.PrimaryKeyRequired
         }
-        self.register(RealmObjectManager(idField: T.primaryKey()!, type: realmObjectType))
+        self.register(realmObjectMgr: RealmObjectManager(idField: T.primaryKey()!, type: realmObjectType))
     }
     
     public func register<T: Object>(realmObjectMgr: RealmObjectManager<T>) {
         let realmObjectType = realmObjectMgr.getObjectType().className()
         self.realmObjectManagers[realmObjectType] = realmObjectMgr
         self.lastSequenceTrackers[realmObjectType] = RealmObjectCouchDBSequenceTracker(realmObjectType: realmObjectType)
-        self.lastSequenceTrackers[realmObjectType]?.start(realm, completionHandler: { (result) in
+        self.lastSequenceTrackers[realmObjectType]?.start(realm: realm, completionHandler: { (result) in
             self.lastSequences[realmObjectType] = result
         })
-        realmObjectMgr.startMonitoringObjectChanges(realm) { (changes) in
-            self.processObjectChanges(realmObjectMgr, changes: changes)
+        realmObjectMgr.startMonitoringObjectChanges(realm: realm) { (changes) in
+            self.processObjectChanges(realmObjectMgr: realmObjectMgr, changes: changes)
         }
     }
     
     public func deregister<T: Object>(realmObjectMgr: RealmObjectManager<T>) {
-        realmObjectMgr.stopMonitoringObjectChanges(realm)
+        realmObjectMgr.stopMonitoringObjectChanges(realm: realm)
     }
     
     public func pull<T:Object>(source: CouchDBEndpoint, target: T.Type) throws -> PullReplicator<T> {
@@ -66,18 +66,18 @@ public class ReplicationManager {
     
     func processObjectChanges<T: Object>(realmObjectMgr: RealmObjectManager<T>, changes: RealmCollectionChange<Results<T>>) {
         switch changes {
-        case .Initial:
+        case .initial:
             // if there are no mappings then initialize the mappings table
-            if (self.atleastOneObjectMappingsExists(realmObjectMgr) == false) {
-                self.addMissingObjectMappings(realmObjectMgr)
+            if (self.atleastOneObjectMappingsExists(realmObjectMgr: realmObjectMgr) == false) {
+                self.addMissingObjectMappings(realmObjectMgr: realmObjectMgr)
             }
             break
-        case .Update(let results, let deletions, let insertions, let modifications):
-            self.removeObjectMappings(realmObjectMgr, realmObjects: Array(results), indexes: deletions)
-            self.addObjectMappings(realmObjectMgr, realmObjects: Array(results), indexes: insertions)
-            self.addOrUpdateObjectMappings(realmObjectMgr, realmObjects: Array(results), indexes: modifications)
+        case .update(let results, let deletions, let insertions, let modifications):
+            self.removeObjectMappings(realmObjectMgr: realmObjectMgr, realmObjects: Array(results), indexes: deletions)
+            self.addObjectMappings(realmObjectMgr: realmObjectMgr, realmObjects: Array(results), indexes: insertions)
+            self.addOrUpdateObjectMappings(realmObjectMgr: realmObjectMgr, realmObjects: Array(results), indexes: modifications)
             break
-        case .Error(let err):
+        case .error(let err):
             // An error occurred while opening the Realm file on the background worker thread
             fatalError("\(err)")
             break
@@ -99,12 +99,12 @@ public class ReplicationManager {
             }
         }
         var sequence = self.lastSequences[realmObjectMgr.getObjectType().className()]?.lastPushSequence ?? Int64(0)
-        let realmObjects = realmObjectMgr.getObjectsNotMatchingIds(realm, ids: realmObjectIds)
+        let realmObjects = realmObjectMgr.getObjectsNotMatchingIds(realm: realm, ids: realmObjectIds)
         for realmObject in realmObjects {
             sequence += Int64(1)
-            self.addObjectMapping(realmObjectMgr, realmObject: realmObject, sequence: sequence)
+            self.addObjectMapping(realmObjectMgr: realmObjectMgr, realmObject: realmObject, sequence: sequence)
         }
-        self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm, lastPushSequence: sequence)
+        self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm: realm, lastPushSequence: sequence)
     }
     
     func addObjectMappings<T: Object>(realmObjectMgr: RealmObjectManager<T>, realmObjects: [T], indexes: [Int]) {
@@ -112,16 +112,16 @@ public class ReplicationManager {
             var sequence = self.lastSequences[realmObjectMgr.getObjectType().className()]?.lastPushSequence ?? Int64(0)
             for idx in indexes {
                 sequence += Int64(1)
-                self.addObjectMapping(realmObjectMgr, realmObject:realmObjects[idx], sequence: sequence)
+                self.addObjectMapping(realmObjectMgr: realmObjectMgr, realmObject:realmObjects[idx], sequence: sequence)
             }
-            self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm, lastPushSequence: sequence)
+            self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm: realm, lastPushSequence: sequence)
         }
     }
     
     func addObjectMapping<T: Object>(realmObjectMgr: RealmObjectManager<T>, realmObject: T, sequence: Int64) {
-        let couchDocId = NSUUID().UUIDString
-        let couchRev = "1-\(NSUUID().UUIDString)"
-        let realmDocMap = RealmObjectCouchDBDocMap(realmObjectType: "\(realmObjectMgr.getObjectType().className())", realmObjectId: realmObjectMgr.getObjectId(realmObject), couchDocId: couchDocId, couchRev: couchRev, couchSequence: sequence)
+        let couchDocId = UUID().uuidString
+        let couchRev = "1-\(UUID().uuidString)"
+        let realmDocMap = RealmObjectCouchDBDocMap(realmObjectType: "\(realmObjectMgr.getObjectType().className())", realmObjectId: realmObjectMgr.getObjectId(object: realmObject), couchDocId: couchDocId, couchRev: couchRev, couchSequence: sequence)
         try! self.realm.write {
             self.realm.add(realmDocMap)
         }
@@ -132,25 +132,25 @@ public class ReplicationManager {
             var sequence = self.lastSequences[realmObjectMgr.getObjectType().className()]?.lastPushSequence ?? Int64(0)
             for idx in indexes {
                 sequence += Int64(1)
-                self.addOrUpdateObjectMapping(realmObjectMgr, realmObject:realmObjects[idx], sequence: sequence)
+                self.addOrUpdateObjectMapping(realmObjectMgr: realmObjectMgr, realmObject:realmObjects[idx], sequence: sequence)
             }
-            self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm, lastPushSequence: sequence)
+            self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPushSequence(realm: realm, lastPushSequence: sequence)
         }
     }
     
     func addOrUpdateObjectMapping<T: Object>(realmObjectMgr: RealmObjectManager<T>, realmObject: T, sequence: Int64) {
-        let realmDocMaps = self.realm.objects(RealmObjectCouchDBDocMap.self).filter("realmObjectType = '\(realmObjectMgr.getObjectType().className())' AND realmObjectId='\(realmObjectMgr.getObjectId(realmObject))'")
+        let realmDocMaps = self.realm.objects(RealmObjectCouchDBDocMap.self).filter("realmObjectType = '\(realmObjectMgr.getObjectType().className())' AND realmObjectId='\(realmObjectMgr.getObjectId(object: realmObject))'")
         if (realmDocMaps.count > 0) {
             for realmDocMap in realmDocMaps {
                 try! self.realm.write {
-                    realmDocMap.couchRev = "1-\(NSUUID().UUIDString)"
+                    realmDocMap.couchRev = "1-\(UUID().uuidString)"
                     realmDocMap.couchSequence = sequence
                     self.realm.add(realmDocMap)
                 }
             }
         }
         else {
-            self.addObjectMapping(realmObjectMgr, realmObject: realmObject, sequence: sequence)
+            self.addObjectMapping(realmObjectMgr: realmObjectMgr, realmObject: realmObject, sequence: sequence)
         }
     }
     
@@ -164,7 +164,7 @@ public class ReplicationManager {
     }
     
     func removeObjectMapping<T: Object>(realmObjectMgr: RealmObjectManager<T>, realmObject: T) {
-        let realmDocMaps = self.realm.objects(RealmObjectCouchDBDocMap.self).filter("realmObjectType = '\(realmObjectMgr.getObjectType().className())' AND realmObjectId='\(realmObjectMgr.getObjectId(realmObject))'")
+        let realmDocMaps = self.realm.objects(RealmObjectCouchDBDocMap.self).filter("realmObjectType = '\(realmObjectMgr.getObjectType().className())' AND realmObjectId='\(realmObjectMgr.getObjectId(object: realmObject))'")
         if (realmDocMaps.count > 0) {
             for realmDocMap in realmDocMaps {
                 // TODO: Need to mark that this has been deleted, so we can delete from server
@@ -191,7 +191,7 @@ public class ReplicationManager {
     }
     
     func saveLocalCheckPoint<T: Object>(realmObjectMgr: RealmObjectManager<T>, sequence: String) {
-        self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPullSequence(realm, lastPullSequence: sequence)
+        self.lastSequenceTrackers[realmObjectMgr.getObjectType().className()]?.updateLastPullSequence(realm: realm, lastPullSequence: sequence)
     }
     
     func localRevsDiff<T: Object>(realmObjectMgr: RealmObjectManager<T>, changes: CouchDBChanges) -> [CouchDBBulkDoc] {
@@ -203,7 +203,7 @@ public class ReplicationManager {
             revs.append(changeRow.changes[0])
         }
         let predicate = NSPredicate(format:"couchDocId IN %@ AND couchRev IN %@", ids, revs)
-        var results = self.realm.objects(RealmObjectCouchDBDocMap.self).filter(predicate)
+        let results = self.realm.objects(RealmObjectCouchDBDocMap.self).filter(predicate)
         var matchingDocIds = [String]()
         for docMap in results {
             matchingDocIds.append(docMap.couchDocId!)
@@ -219,7 +219,7 @@ public class ReplicationManager {
     func localBulkInsert<T: Object>(realmObjectMgr: RealmObjectManager<T>, docs: [CouchDBBulkDoc]) throws -> Int {
         var changesProcessed = 0
         // stop monitoring changes while we load
-        realmObjectMgr.stopMonitoringObjectChanges(self.realm)
+        realmObjectMgr.stopMonitoringObjectChanges(realm: self.realm)
         //
         for doc in docs {
             if (doc.docRev.deleted) {
@@ -228,13 +228,13 @@ public class ReplicationManager {
             else if (doc.doc != nil) {
                 var realmObject: T? = nil
                 try! self.realm.write {
-                    var existingRealmObject = realmObjectMgr.getObjectById(self.realm, id: doc.docRev.docId)
+                    let existingRealmObject = realmObjectMgr.getObjectById(realm: self.realm, id: doc.docRev.docId)
                     if (existingRealmObject != nil) {
                         realmObject = existingRealmObject
-                        realmObjectMgr.updateObjectWithDictionary(realmObject!, dict: doc.doc!)
+                        realmObjectMgr.updateObjectWithDictionary(object: realmObject!, dict: doc.doc!)
                     }
                     else {
-                        realmObject = realmObjectMgr.objectFromDictionary(doc.doc!)
+                        realmObject = realmObjectMgr.objectFromDictionary(dict: doc.doc!)
                     }
                     if (realmObject != nil) {
                         changesProcessed += 1
@@ -242,13 +242,13 @@ public class ReplicationManager {
                     }
                 }
                 if (realmObject != nil) {
-                    self.addOrUpdateObjectMapping(realmObjectMgr, realmObject:realmObject!, sequence: Int64(0))
+                    self.addOrUpdateObjectMapping(realmObjectMgr: realmObjectMgr, realmObject:realmObject!, sequence: Int64(0))
                 }
             }
         }
         // start monitoring changes again
-        realmObjectMgr.startMonitoringObjectChanges(self.realm) { (changes) in
-            self.processObjectChanges(realmObjectMgr, changes: changes)
+        realmObjectMgr.startMonitoringObjectChanges(realm: self.realm) { (changes) in
+            self.processObjectChanges(realmObjectMgr: realmObjectMgr, changes: changes)
         }
         return changesProcessed
     }

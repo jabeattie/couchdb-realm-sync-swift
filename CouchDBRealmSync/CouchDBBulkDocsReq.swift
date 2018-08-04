@@ -27,14 +27,14 @@ public class CouchDBBulkDocsReq {
         self.docs = docs
     }
     
-    func toDictionary() -> [String:AnyObject] {
-        var docDicts: [[String:AnyObject]] = []
+    func toDictionary() -> [String: AnyObject] {
+        var docDicts: [[String: AnyObject]] = []
         for doc in self.docs {
             docDicts.append(doc.toDictionary())
         }
-        var dict:[String:AnyObject] = [String:AnyObject]();
-        dict["new_edits"] = false
-        dict["docs"] = docDicts
+        var dict:[String: AnyObject] = [String: AnyObject]();
+        dict["new_edits"] = false as AnyObject
+        dict["docs"] = docDicts as AnyObject
         return dict
     }
     

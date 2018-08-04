@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum CouchDBError: ErrorType {
+public enum CouchDBError: Error {
     case EmptyResponse
 }
 
@@ -30,27 +30,23 @@ public class CouchDBClient {
     
     // MARK: _all_docs
     
-    public func getAllDocs(db: String, completionHandler: (rows: [AnyObject]?, error: ErrorType?) -> Void) {
-        let session = NSURLSession.sharedSession()
-        let request = self.createGetRequest(db, path: "_all_docs")
-        let task = session.dataTaskWithRequest(request) {
-            (let data, let response, let err) in
+    public func getAllDocs(db: String, completionHandler: @escaping ([AnyObject]?, Error?) -> Void) {
+        let session = URLSession.shared
+        let request = self.createGetRequest(db: db, path: "_all_docs")
+        let task = session.dataTask(with: request) { (data, response, err) in
             do {
-                let dict: NSDictionary? = try self.parseResponse(data, response: response, error: err)
-                if (dict != nil) {
-                    if let rows = dict!["rows"] as? [[String:AnyObject]] {
-                        completionHandler(rows: rows, error: nil)
-                    }
-                    else {
-                        completionHandler(rows: nil, error: nil)
-                    }
+                guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
+                    completionHandler(nil, nil)
+                    return
                 }
-                else {
-                    completionHandler(rows: nil, error: nil)
+                if let rows = dict["rows"] as? [[String: AnyObject]] {
+                    completionHandler(rows as [AnyObject], nil)
+                } else {
+                    completionHandler(nil, nil)
                 }
             }
             catch {
-                completionHandler(rows: nil, error: error)
+                completionHandler(nil, error)
             }
         }
         task.resume()
@@ -58,56 +54,52 @@ public class CouchDBClient {
     
     // MARK: _bulk_docs
     
-    public func bulkDocs(db: String, docs: [CouchDBBulkDoc], completionHandler: (docs: [AnyObject]?, error: ErrorType?) -> Void) {
+    public func bulkDocs(db: String, docs: [CouchDBBulkDoc], completionHandler: @escaping ([AnyObject]?, Error?) -> Void) {
          do {
             let bulkDocRequest = CouchDBBulkDocsReq(docs: docs)
-            let body = try NSJSONSerialization.dataWithJSONObject(bulkDocRequest.toDictionary(), options: [])
-            let session = NSURLSession.sharedSession()
-            let request = self.createPostRequest(db, path: "_bulk_docs", body: body)
-            let task = session.dataTaskWithRequest(request) {
-                (let data, let response, let err) in
+            let body = try JSONSerialization.data(withJSONObject: bulkDocRequest.toDictionary(), options: [])
+            let session = URLSession.shared
+            let request = self.createPostRequest(db: db, path: "_bulk_docs", body: body)
+            let task = session.dataTask(with: request) {
+                (data, response, err) in
                 do {
-                    let array: [AnyObject]? = try self.parseResponseAsArray(data, response: response, error: err)
-                    if (array != nil) {
-                        completionHandler(docs: array, error: nil)
+                    guard let array = try self.parseResponseAsArray(data: data, response: response, error: err) else {
+                        completionHandler(nil, nil)
+                        return
                     }
-                    else {
-                        completionHandler(docs: nil, error: nil)
-                    }
+                    completionHandler(array, nil)
                 }
                 catch {
-                    completionHandler(docs: nil, error: error)
+                    completionHandler(nil, error)
                 }
             }
             task.resume()
-         }
-         catch {
-            completionHandler(docs: nil, error: error)
+        }
+        catch {
+            completionHandler(nil, error)
         }
     }
     
     // MARK: _changes
     
-    public func getChanges(db: String, since: String?, includeDocs: Bool, completionHandler: (changes: CouchDBChanges?, error: ErrorType?) -> Void) {
+    public func getChanges(db: String, since: String?, includeDocs: Bool, completionHandler: @escaping (CouchDBChanges?, Error?) -> Void) {
         var path = "_changes?include_docs=\(includeDocs)"
         if (since != nil) {
             path = "\(path)&since=\(since!)"
         }
-        let session = NSURLSession.sharedSession()
-        let request = self.createGetRequest(db, path: path)
-        let task = session.dataTaskWithRequest(request) {
-            (let data, let response, let err) in
+        let session = URLSession.shared
+        let request = self.createGetRequest(db: db, path: path)
+        let task = session.dataTask(with: request) {
+            (data, response, err) in
             do {
-                let dict: [String:AnyObject]? = try self.parseResponse(data, response: response, error: err)
-                if (dict != nil) {
-                    completionHandler(changes: CouchDBChanges(dict: dict!), error: nil)
+                guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
+                    completionHandler(nil, nil)
+                    return
                 }
-                else {
-                    completionHandler(changes: nil, error: nil)
-                }
+                completionHandler(CouchDBChanges(dict: dict), nil)
             }
             catch {
-                completionHandler(changes: nil, error: error)
+                completionHandler(nil, error)
             }
         }
         task.resume()
@@ -115,52 +107,45 @@ public class CouchDBClient {
     
     // MARK: _local
     
-    public func saveCheckpoint(db: String, replicationId: String, lastSequence: Int64, completionHandler: (error: ErrorType?) -> Void) {
+    public func saveCheckpoint(db: String, replicationId: String, lastSequence: Int64, completionHandler: @escaping (Error?) -> Void) {
         do {
-            let body = try NSJSONSerialization.dataWithJSONObject(["lastSequence":"\(lastSequence)"], options: [])
-            let session = NSURLSession.sharedSession()
-            let request = self.createPutRequest(db, path: "_local/\(replicationId)", body: body)
-            let task = session.dataTaskWithRequest(request) {
-                (let data, let response, let err) in
+            let body = try JSONSerialization.data(withJSONObject: ["lastSequence":"\(lastSequence)"], options: [])
+            let session = URLSession.shared
+            let request = self.createPutRequest(db: db, path: "_local/\(replicationId)", body: body)
+            let task = session.dataTask(with: request) {
+                (data, response, err) in
                 do {
-                    let dict: NSDictionary? = try self.parseResponse(data, response: response, error: err)
-                    if (dict != nil) {
-                        print("SAVE CHECKPOINT RESPONSE: \(dict!)")
-                        completionHandler(error: nil)
+                    guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
+                        completionHandler(nil)
+                        return
                     }
-                    else {
-                        completionHandler(error: nil)
-                    }
-                }
-                catch {
-                    completionHandler(error: error)
+                    print("SAVE CHECKPOINT RESPONSE: \(dict)")
+                    completionHandler(nil)
+                } catch {
+                    completionHandler(error)
                 }
             }
             task.resume()
-        }
-        catch {
-            completionHandler(error: error)
+        } catch {
+            completionHandler(error)
         }
     }
     
-    public func getCheckpoint(db: String, replicationId: String, completionHandler: (lastSequence: Int64?, error: ErrorType?) -> Void) {
-        let session = NSURLSession.sharedSession()
-        let request = self.createGetRequest(db, path: "_local/\(replicationId)")
-        let task = session.dataTaskWithRequest(request) {
-            (let data, let response, let err) in
+    public func getCheckpoint(db: String, replicationId: String, completionHandler: @escaping (Int64?, Error?) -> Void) {
+        let session = URLSession.shared
+        let request = self.createGetRequest(db: db, path: "_local/\(replicationId)")
+        let task = session.dataTask(with: request) {
+            (data, response, err) in
             do {
-                let dict: NSDictionary? = try self.parseResponse(data, response: response, error: err)
-                if (dict != nil) {
-                    print("GET CHECKPOINT RESPONSE: \(dict!)")
-                    let lastSequence: Int64? = dict!["lastSequence"]?.longLongValue
-                    completionHandler(lastSequence: lastSequence, error: nil)
+                guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
+                    completionHandler(nil, nil)
+                    return
                 }
-                else {
-                    completionHandler(lastSequence: nil, error: nil)
-                }
-            }
-            catch {
-                completionHandler(lastSequence: nil, error: error)
+                print("GET CHECKPOINT RESPONSE: \(dict)")
+                let lastSequence: Int64? = (dict["lastSequence"] as AnyObject).longLongValue
+                completionHandler(lastSequence, nil)
+            } catch {
+                completionHandler(nil, error)
             }
         }
         task.resume()
@@ -168,101 +153,98 @@ public class CouchDBClient {
     
     // MARK: _revs_diff
     
-    public func revsDiff(db: String, docRevs: [CouchDBDocRev], completionHandler: (missingDocRevs: [CouchDBDocMissingRevs]?, error: ErrorType?) -> Void) {
+    public func revsDiff(db: String, docRevs: [CouchDBDocRev], completionHandler: @escaping ([CouchDBDocMissingRevs]?, Error?) -> Void) {
         do {
             var dict = [String:[String]]()
             for docRev in docRevs {
                 dict[docRev.docId] = [docRev.revision]
             }
-            let body = try NSJSONSerialization.dataWithJSONObject(dict, options: [])
-            let session = NSURLSession.sharedSession()
-            let request = self.createPostRequest(db, path: "_revs_diff", body: body)
-            let task = session.dataTaskWithRequest(request) {
-                (let data, let response, let err) in
+            let body = try JSONSerialization.data(withJSONObject: dict, options: [])
+            let session = URLSession.shared
+            let request = self.createPostRequest(db: db, path: "_revs_diff", body: body)
+            let task = session.dataTask(with: request) {
+                (data, response, err) in
                 do {
-                    let dict: NSDictionary? = try self.parseResponse(data, response: response, error: err)
-                    if (dict != nil) {
-                        var docMissingRevs: [CouchDBDocMissingRevs] = []
-                        for key in dict!.allKeys {
-                            let missingRevs = (dict?.objectForKey(key) as! NSDictionary).objectForKey("missing") as! [String]
-                            docMissingRevs.append(CouchDBDocMissingRevs(docId: key as! String, missingRevs: missingRevs))
-                        }
-                        completionHandler(missingDocRevs: docMissingRevs, error: nil)
+                    guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
+                        completionHandler([], nil)
+                        return
                     }
-                    else {
-                        completionHandler(missingDocRevs: [], error: nil)
-                    }
+                    let docMissingRevs: [CouchDBDocMissingRevs] = dict.map({
+                        let missingRevs = $0.value.object(forKey: "missing") as? [String] ?? []
+                        return CouchDBDocMissingRevs(docId: $0.key, missingRevs: missingRevs)
+                    })
+                    completionHandler(docMissingRevs, nil)
                 }
                 catch {
-                    completionHandler(missingDocRevs: nil, error: error)
+                    completionHandler(nil, error)
                 }
             }
             task.resume()
         }
         catch {
-            completionHandler(missingDocRevs: nil, error: error)
+            completionHandler(nil, error)
         }
     }
     
     // MARK: Helper Functions
     
-    func createGetRequest(db: String, path: String) -> NSMutableURLRequest {
-        let url = NSURL(string: "\(self.baseUrl)/\(db)/\(path)")
-        let request = NSMutableURLRequest(URL: url!)
-        request.addValue("application/json", forHTTPHeaderField:"Content-Type")
+    func createGetRequest(db: String, path: String) -> URLRequest {
+        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
+        var request = URLRequest(url: url!)
+        request.addValue(" as URLapplication/json", forHTTPHeaderField:"Content-Type")
         request.addValue("application/json", forHTTPHeaderField:"Accepts")
-        request.HTTPMethod = "GET"
+        request.httpMethod = "GET"
         if (self.username != nil && self.password != nil) {
             let loginString = "\(self.username!):\(self.password!)"
-            let loginData: NSData? = loginString.dataUsingEncoding(NSUTF8StringEncoding)
-            let base64LoginString = loginData!.base64EncodedStringWithOptions(.Encoding64CharacterLineLength)
+            let loginData: Data? = loginString.data(using: .utf8)
+            let base64LoginString = loginData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
             request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
         }
         return request
     }
     
-    func createPostRequest(db: String, path: String, body: NSData?) -> NSMutableURLRequest {
-        let url = NSURL(string: "\(self.baseUrl)/\(db)/\(path)")
-        let request = NSMutableURLRequest(URL: url!)
+    func createPostRequest(db: String, path: String, body: Data?) -> URLRequest {
+        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
+        var request = URLRequest(url: url!)
         request.addValue("application/json", forHTTPHeaderField:"Content-Type")
         request.addValue("application/json", forHTTPHeaderField:"Accepts")
-        request.HTTPMethod = "POST"
+        request.httpMethod = "POST"
         if (body != nil) {
-            request.HTTPBody = body
+            request.httpBody = body
         }
         return request
     }
     
-    func createPutRequest(db: String, path: String, body: NSData?) -> NSMutableURLRequest {
-        let url = NSURL(string: "\(self.baseUrl)/\(db)/\(path)")
-        let request = NSMutableURLRequest(URL: url!)
+    func createPutRequest(db: String, path: String, body: Data?) -> URLRequest {
+        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
+        var request = URLRequest(url: url!)
         request.addValue("application/json", forHTTPHeaderField:"Content-Type")
         request.addValue("application/json", forHTTPHeaderField:"Accepts")
-        request.HTTPMethod = "PUT"
+        request.httpMethod = "PUT"
         if (body != nil) {
-            request.HTTPBody = body
+            request.httpBody = body
         }
         return request
     }
     
-    func parseResponse(data:NSData?, response:NSURLResponse?, error:NSError?) throws -> [String:AnyObject]? {
-        if (error != nil) {
-            throw error!
+    func parseResponse(data: Data?, response: URLResponse?, error: Error?) throws -> [String: AnyObject]? {
+        if let err = error {
+            throw err
         }
-        else if (data == nil) {
+        guard let data = data else {
             throw CouchDBError.EmptyResponse
         }
-        return try NSJSONSerialization.JSONObjectWithData(data!, options:[]) as? [String:AnyObject]
+        return try JSONSerialization.jsonObject(with: data, options: []) as? [String: AnyObject]
     }
     
-    func parseResponseAsArray(data:NSData?, response:NSURLResponse?, error:NSError?) throws -> [AnyObject]? {
-        if (error != nil) {
-            throw error!
+    func parseResponseAsArray(data: Data?, response: URLResponse?, error: Error?) throws -> [AnyObject]? {
+        if let err = error {
+            throw err
         }
-        else if (data == nil) {
+        guard let data = data else {
             throw CouchDBError.EmptyResponse
         }
-        return try NSJSONSerialization.JSONObjectWithData(data!, options:[]) as? [AnyObject]
+        return try JSONSerialization.jsonObject(with: data, options: []) as? [AnyObject]
     }
     
 }

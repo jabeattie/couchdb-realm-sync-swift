@@ -16,7 +16,7 @@ public class PullReplicator<T: Object> : Replicator {
     var realmObjectMgr: RealmObjectManager<T>
     var replicationMgr: ReplicationManager
     var couchClient: CouchDBClient
-    var completionHandler: ((result: ReplicationResult) -> Void)?
+    var completionHandler: ((ReplicationResult) -> Void)?
     
     public init(source: CouchDBEndpoint, realmObjectMgr: RealmObjectManager<T>, replicationMgr: ReplicationManager) {
         self.source = source
@@ -28,48 +28,48 @@ public class PullReplicator<T: Object> : Replicator {
     public func getReplicatorId() throws -> String {
         var dict: [String:String] = [String:String]();
         dict["source"] = self.source.description
-        dict["target"] = self.replicationMgr.getRealmObjectReplicatorId(self.realmObjectMgr)
-        let jsonData = try NSJSONSerialization.dataWithJSONObject(dict, options: [])
-        return CryptoUtils.sha1(jsonData)
+        dict["target"] = self.replicationMgr.getRealmObjectReplicatorId(realmObjectMgr: self.realmObjectMgr)
+        let jsonData = try JSONSerialization.data(withJSONObject: dict, options: [])
+        return CryptoUtils.sha1(input: jsonData)
     }
     
-    public func start(completionHandler: (result: ReplicationResult) -> Void) throws {
+    public func start(completionHandler: @escaping (ReplicationResult) -> Void) throws {
         self.completionHandler = completionHandler
         let replicatorId = try self.getReplicatorId()
         print("REPLICATOR ID: \(replicatorId)")
-        let checkpoint = self.replicationMgr.localCheckpoint(self.realmObjectMgr, replicatorId: replicatorId)
-        self.couchClient.getChanges(self.source.db, since: checkpoint, includeDocs: true) { (changes, error) in
-            dispatch_async(dispatch_get_main_queue(), {
+        let checkpoint = self.replicationMgr.localCheckpoint(realmObjectMgr: self.realmObjectMgr, replicatorId: replicatorId)
+        self.couchClient.getChanges(db: self.source.db, since: checkpoint, includeDocs: true) { (changes, error) in
+            DispatchQueue.main.async {
                 if (error != nil) {
-                    self.replicationFailed(error, errorMessage: "Error getting changes from CouchDB")
+                    self.replicationFailed(error: error, errorMessage: "Error getting changes from CouchDB")
                 }
                 else if (changes == nil) {
-                    self.replicationComplete(0)
+                    self.replicationComplete(changesProcessed: 0)
                 }
                 else {
-                    let missingDocs = self.replicationMgr.localRevsDiff(self.realmObjectMgr, changes: changes!)
+                    let missingDocs = self.replicationMgr.localRevsDiff(realmObjectMgr: self.realmObjectMgr, changes: changes!)
                     if (missingDocs.count > 0) {
                         do {
-                            let changesProcessed = try self.replicationMgr.localBulkInsert(self.realmObjectMgr, docs: missingDocs)
-                            self.replicationMgr.saveLocalCheckPoint(self.realmObjectMgr, sequence: changes!.lastSequence!)
-                            self.replicationComplete(changesProcessed)
+                            let changesProcessed = try self.replicationMgr.localBulkInsert(realmObjectMgr: self.realmObjectMgr, docs: missingDocs)
+                            self.replicationMgr.saveLocalCheckPoint(realmObjectMgr: self.realmObjectMgr, sequence: changes!.lastSequence!)
+                            self.replicationComplete(changesProcessed: changesProcessed)
                         }
                         catch {
-                            self.replicationFailed(error, errorMessage: "Error updating documents")
+                            self.replicationFailed(error: error, errorMessage: "Error updating documents")
                         }
                     }
                 }
-            })
+            }
         }
     }
     
     // MARK: Replication Complete/Cancel Functions
     
     private func replicationComplete(changesProcessed: Int) {
-        self.completionHandler?(result: ReplicationResult(replicator: self, changesProcessed: changesProcessed))
+        self.completionHandler?(ReplicationResult(replicator: self, changesProcessed: changesProcessed))
     }
     
-    private func replicationFailed(error: ErrorType?, errorMessage: String?) {
-        self.completionHandler?(result: ReplicationResult(replicator: self, error: error, errorMessage: errorMessage))
+    private func replicationFailed(error: Error?, errorMessage: String?) {
+        self.completionHandler?(ReplicationResult(replicator: self, error: error, errorMessage: errorMessage))
     }
 }

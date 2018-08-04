@@ -15,31 +15,19 @@ import RealmSwift
  */
 class RealmObjectCouchDBDocMap : Object {
     
-    dynamic var realmObjectType: String?
-    dynamic var realmObjectId: String?
-    dynamic var couchDocId: String?
-    dynamic var couchRev: String?
-    dynamic var couchSequence: Int64 = 0
+    @objc dynamic var realmObjectType: String?
+    @objc dynamic var realmObjectId: String?
+    @objc dynamic var couchDocId: String?
+    @objc dynamic var couchRev: String?
+    @objc dynamic var couchSequence: Int64 = 0
     
-    required init() {
-        super.init()
-    }
-    
-    required init(realm: RLMRealm, schema: RLMObjectSchema) {
-        super.init(realm: realm, schema: schema)
-    }
-    
-    required init(value: AnyObject, schema: RLMSchema) {
-        super.init(value: value, schema: schema)
-    }
-    
-    init(realmObjectType: String, realmObjectId: String, couchDocId: String, couchRev: String, couchSequence: Int64) {
+    convenience init(realmObjectType: String, realmObjectId: String, couchDocId: String, couchRev: String, couchSequence: Int64) {
+        self.init()
         self.realmObjectType = realmObjectType;
         self.realmObjectId = realmObjectId
         self.couchDocId = couchDocId
         self.couchRev = couchRev
         self.couchSequence = couchSequence
-        super.init()
     }
     
 }

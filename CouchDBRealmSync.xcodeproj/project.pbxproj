@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A24E42C2115FB5600F00AC5 /* RealmSwift.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 4A24E4292115FB5600F00AC5 /* RealmSwift.framework.dSYM */; };
+		4A24E42D2115FB5600F00AC5 /* Realm.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 4A24E42A2115FB5600F00AC5 /* Realm.framework.dSYM */; };
+		4A24E42E2115FB5600F00AC5 /* CryptoSwift.framework.dSYM in Resources */ = {isa = PBXBuildFile; fileRef = 4A24E42B2115FB5600F00AC5 /* CryptoSwift.framework.dSYM */; };
+		4A24E42F2115FB5E00F00AC5 /* CryptoSwift.framework.dSYM in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A24E42B2115FB5600F00AC5 /* CryptoSwift.framework.dSYM */; };
+		4A24E4302115FB6000F00AC5 /* Realm.framework.dSYM in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A24E42A2115FB5600F00AC5 /* Realm.framework.dSYM */; };
+		4A24E4312115FB6200F00AC5 /* RealmSwift.framework.dSYM in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A24E4292115FB5600F00AC5 /* RealmSwift.framework.dSYM */; };
 		D713478F1D51449300BE5EEC /* RealmObjectChanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = D713478E1D51449300BE5EEC /* RealmObjectChanges.swift */; };
 		D71347911D5144A700BE5EEC /* CouchDBDocRev.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71347901D5144A700BE5EEC /* CouchDBDocRev.swift */; };
 		D71A18381D5222A300B32F33 /* CouchDBDocMissingRevs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71A18371D5222A300B32F33 /* CouchDBDocMissingRevs.swift */; };
@@ -31,7 +37,6 @@
 		D74EB40C1D5105CF0087DBBB /* RealmObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D74EB40B1D5105CF0087DBBB /* RealmObjectManager.swift */; };
 		D7C1C8851D538D1F003B5CCA /* CouchDBChanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C1C8841D538D1F003B5CCA /* CouchDBChanges.swift */; };
 		D7C1C8871D538FD9003B5CCA /* CouchDBChangeRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7C1C8861D538FD9003B5CCA /* CouchDBChangeRow.swift */; };
-		EDE79694D4E566D107222555 /* Pods_CouchDBRealmSync.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A79F888CED4479A9866E601 /* Pods_CouchDBRealmSync.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,9 +50,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		41CC0BF2B2F44D23D3EF4DE3 /* Pods-CouchDBRealmSync.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CouchDBRealmSync.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CouchDBRealmSync/Pods-CouchDBRealmSync.debug.xcconfig"; sourceTree = "<group>"; };
-		4A519C907E33533760307134 /* Pods-CouchDBRealmSync.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CouchDBRealmSync.release.xcconfig"; path = "Pods/Target Support Files/Pods-CouchDBRealmSync/Pods-CouchDBRealmSync.release.xcconfig"; sourceTree = "<group>"; };
-		5A79F888CED4479A9866E601 /* Pods_CouchDBRealmSync.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CouchDBRealmSync.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A24E4292115FB5600F00AC5 /* RealmSwift.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = RealmSwift.framework.dSYM; path = Carthage/Build/iOS/RealmSwift.framework.dSYM; sourceTree = "<group>"; };
+		4A24E42A2115FB5600F00AC5 /* Realm.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = Realm.framework.dSYM; path = Carthage/Build/iOS/Realm.framework.dSYM; sourceTree = "<group>"; };
+		4A24E42B2115FB5600F00AC5 /* CryptoSwift.framework.dSYM */ = {isa = PBXFileReference; lastKnownFileType = wrapper.dsym; name = CryptoSwift.framework.dSYM; path = Carthage/Build/iOS/CryptoSwift.framework.dSYM; sourceTree = "<group>"; };
 		D713478E1D51449300BE5EEC /* RealmObjectChanges.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealmObjectChanges.swift; sourceTree = "<group>"; };
 		D71347901D5144A700BE5EEC /* CouchDBDocRev.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouchDBDocRev.swift; sourceTree = "<group>"; };
 		D71A18371D5222A300B32F33 /* CouchDBDocMissingRevs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CouchDBDocMissingRevs.swift; sourceTree = "<group>"; };
@@ -82,7 +87,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EDE79694D4E566D107222555 /* Pods_CouchDBRealmSync.framework in Frameworks */,
+				4A24E42F2115FB5E00F00AC5 /* CryptoSwift.framework.dSYM in Frameworks */,
+				4A24E4302115FB6000F00AC5 /* Realm.framework.dSYM in Frameworks */,
+				4A24E4312115FB6200F00AC5 /* RealmSwift.framework.dSYM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,22 +104,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B67507876668CB3A5A3CE11F /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				41CC0BF2B2F44D23D3EF4DE3 /* Pods-CouchDBRealmSync.debug.xcconfig */,
-				4A519C907E33533760307134 /* Pods-CouchDBRealmSync.release.xcconfig */,
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 		D74EB3CF1D50F26B0087DBBB = {
 			isa = PBXGroup;
 			children = (
 				D74EB3DB1D50F26B0087DBBB /* CouchDBRealmSync */,
 				D74EB3E71D50F26B0087DBBB /* CouchDBRealmSyncTests */,
 				D74EB3DA1D50F26B0087DBBB /* Products */,
-				B67507876668CB3A5A3CE11F /* Pods */,
 				E69C8B7465F4C58C20A452A2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -200,7 +197,9 @@
 		E69C8B7465F4C58C20A452A2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				5A79F888CED4479A9866E601 /* Pods_CouchDBRealmSync.framework */,
+				4A24E42B2115FB5600F00AC5 /* CryptoSwift.framework.dSYM */,
+				4A24E42A2115FB5600F00AC5 /* Realm.framework.dSYM */,
+				4A24E4292115FB5600F00AC5 /* RealmSwift.framework.dSYM */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -223,12 +222,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D74EB3ED1D50F26B0087DBBB /* Build configuration list for PBXNativeTarget "CouchDBRealmSync" */;
 			buildPhases = (
-				5C88E8FB0736CC40CE00107F /* 📦 Check Pods Manifest.lock */,
+				4A24E4322115FC4800F00AC5 /* SwiftLint */,
 				D74EB3D41D50F26B0087DBBB /* Sources */,
 				D74EB3D51D50F26B0087DBBB /* Frameworks */,
 				D74EB3D61D50F26B0087DBBB /* Headers */,
 				D74EB3D71D50F26B0087DBBB /* Resources */,
-				EA6C617149A58CEDFE76CC31 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -264,7 +262,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = "IBM CDS Labs";
 				TargetAttributes = {
 					D74EB3D81D50F26B0087DBBB = {
@@ -298,6 +296,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A24E42D2115FB5600F00AC5 /* Realm.framework.dSYM in Resources */,
+				4A24E42C2115FB5600F00AC5 /* RealmSwift.framework.dSYM in Resources */,
+				4A24E42E2115FB5600F00AC5 /* CryptoSwift.framework.dSYM in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,35 +312,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		5C88E8FB0736CC40CE00107F /* 📦 Check Pods Manifest.lock */ = {
+		4A24E4322115FC4800F00AC5 /* SwiftLint */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "📦 Check Pods Manifest.lock";
+			name = SwiftLint;
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		EA6C617149A58CEDFE76CC31 /* 📦 Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "📦 Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CouchDBRealmSync/Pods-CouchDBRealmSync-resources.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "#if which swiftlint >/dev/null; then\n#swiftlint\n#else\n#    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\n#fi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -400,13 +385,23 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -429,7 +424,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -449,13 +444,23 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -472,9 +477,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -484,38 +490,45 @@
 		};
 		D74EB3EE1D50F26B0087DBBB /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 41CC0BF2B2F44D23D3EF4DE3 /* Pods-CouchDBRealmSync.debug.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/iOS";
 				INFOPLIST_FILE = CouchDBRealmSync/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.cds.labs.CouchDBRealmSync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jabeattie.CouchDBRealmSync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
 		D74EB3EF1D50F26B0087DBBB /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4A519C907E33533760307134 /* Pods-CouchDBRealmSync.release.xcconfig */;
 			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Carthage/Build/iOS";
 				INFOPLIST_FILE = CouchDBRealmSync/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.cds.labs.CouchDBRealmSync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jabeattie.CouchDBRealmSync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -526,6 +539,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.cdslabs.CouchDBRealmSyncTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -536,6 +550,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.cdslabs.CouchDBRealmSyncTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};

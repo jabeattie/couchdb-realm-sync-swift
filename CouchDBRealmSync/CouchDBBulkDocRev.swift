@@ -18,15 +18,15 @@ public class CouchDBBulkDocRev {
     var start: Int64
     var ids: [String]
     
-    public init(start:Int64, ids: [String]) {
+    public init(start: Int64, ids: [String]) {
         self.start = start
         self.ids = ids
     }
     
-    func toDictionary() -> [String:AnyObject] {
-        var dict:[String:AnyObject] = [String:AnyObject]();
-        dict["start"] = NSNumber(longLong:self.start)
-        dict["ids"] = self.ids
+    func toDictionary() -> [String: AnyObject] {
+        var dict:[String: AnyObject] = [String: AnyObject]();
+        dict["start"] = NSNumber(value: self.start)
+        dict["ids"] = self.ids as AnyObject
         return dict
     }
 }

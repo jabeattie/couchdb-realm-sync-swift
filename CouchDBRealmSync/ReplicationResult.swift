@@ -13,7 +13,7 @@ public class ReplicationResult {
     public var replicator: Replicator
     public var success: Bool
     public var changesProcessed: Int
-    public var error: ErrorType?
+    public var error: Error?
     public var errorMessage: String?
     
     init(replicator: Replicator, changesProcessed: Int) {
@@ -22,7 +22,7 @@ public class ReplicationResult {
         self.changesProcessed = changesProcessed
     }
     
-    init(replicator: Replicator, error: ErrorType?, errorMessage: String?) {
+    init(replicator: Replicator, error: Error?, errorMessage: String?) {
         self.replicator = replicator
         self.success = false
         self.changesProcessed = 0

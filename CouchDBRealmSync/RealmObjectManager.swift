@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Realm
 import RealmSwift
 
 public class RealmObjectManager<T: Object> {
@@ -32,11 +31,10 @@ public class RealmObjectManager<T: Object> {
     public func getObjectById(realm: Realm, id: String) -> T? {
         let clause = "\(self.idField) = %@"
         let predicate = NSPredicate(format: clause, id)
-        let results = realm.objects(T).filter(predicate)
+        let results = realm.objects(T.self).filter(predicate)
         if (results.count == 0) {
             return nil
-        }
-        else {
+        } else {
             return results[0]
         }
     }
@@ -44,17 +42,16 @@ public class RealmObjectManager<T: Object> {
     public func getObjectsMatchingIds(realm: Realm, ids: [String]) -> Results<T> {
         let clause = "\(self.idField) IN %@"
         let predicate = NSPredicate(format: clause, ids)
-        return realm.objects(T).filter(predicate)
+        return realm.objects(T.self).filter(predicate)
     }
     
     public func getObjectsNotMatchingIds(realm: Realm, ids: [String]) -> Results<T> {
         if (ids.count == 0) {
-            return realm.objects(T)
-        }
-        else {
+            return realm.objects(T.self)
+        } else {
             let clause = "NOT (\(self.idField) IN %@)"
             let predicate = NSPredicate(format: clause, ids)
-            return realm.objects(T).filter(predicate)
+            return realm.objects(T.self).filter(predicate)
         }
     }
     
@@ -63,29 +60,28 @@ public class RealmObjectManager<T: Object> {
     }
     
     public func objectFromDictionary(dict: [String:AnyObject]) -> T? {
-        let object = Object.objectClassFromString(self.type.className()) as? T
+        let object = Object.objectClassFromString(className: self.type.className()) as? T
         if (object != nil) {
-            self.updateObjectWithDictionary(object!, dict: dict)
+            self.updateObjectWithDictionary(object: object!, dict: dict)
             return object
-        }
-        else {
+        } else {
             return nil
         }
     }
     
     public func updateObjectWithDictionary(object: T, dict: [String:AnyObject]) {
-        object.updateFromDictionary(dict)
+        object.updateFromDictionary(dict: dict)
     }
     
-    public func startMonitoringObjectChanges(realm: Realm, completionHandler: (changes: RealmCollectionChange<Results<T>>) -> Void) {
-        self.notificationToken = realm.objects(T).addNotificationBlock { (changes) in
-            completionHandler(changes: changes)
+    public func startMonitoringObjectChanges(realm: Realm, completionHandler: @escaping (RealmCollectionChange<Results<T>>) -> Void) {
+        self.notificationToken = realm.objects(T.self).observe { (changes) in
+            completionHandler(changes)
         }
     }
     
     public func stopMonitoringObjectChanges(realm: Realm) {
         if (self.notificationToken != nil) {
-            self.notificationToken?.stop()
+            self.notificationToken?.invalidate()
             self.notificationToken = nil
         }
     }

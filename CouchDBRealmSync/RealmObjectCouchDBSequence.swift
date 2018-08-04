@@ -16,31 +16,19 @@ import RealmSwift
  */
 class RealmObjectCouchDBSequence : Object {
     
-    dynamic var realmObjectType: String?
-    dynamic var realmObjectReplicatorId: String = NSUUID().UUIDString
-    dynamic var lastPushSequence: Int64 = 0
-    dynamic var lastPullSequence: String?
+    @objc dynamic var realmObjectType: String?
+    @objc dynamic var realmObjectReplicatorId: String = UUID().uuidString
+    @objc dynamic var lastPushSequence: Int64 = 0
+    @objc dynamic var lastPullSequence: String?
     
     override class func primaryKey() -> String? {
         return "realmObjectType"
     }
     
-    required init() {
-        super.init()
-    }
-    
-    required init(realm: RLMRealm, schema: RLMObjectSchema) {
-        super.init(realm: realm, schema: schema)
-    }
-    
-    required init(value: AnyObject, schema: RLMSchema) {
-        super.init(value: value, schema: schema)
-    }
-    
-    init(realmObjectType: String, lastPushSequence: Int64, lastPullSequence: String?) {
-        self.realmObjectType = realmObjectType;
+    convenience init(realmObjectType: String, lastPushSequence: Int64, lastPullSequence: String?) {
+        self.init()
+        self.realmObjectType = realmObjectType
         self.lastPushSequence = lastPushSequence
         self.lastPullSequence = lastPullSequence
-        super.init()
     }
 }

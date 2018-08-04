@@ -9,5 +9,5 @@
 import Foundation
 
 public protocol Replicator: AnyObject {
-    func start(completionHandler: (result: ReplicationResult) -> Void) throws
+    func start(completionHandler: @escaping (ReplicationResult) -> Void) throws
 }
