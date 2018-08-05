@@ -22,7 +22,7 @@ public class CouchDBBulkDoc {
     
     var docRev: CouchDBDocRev
     //var revisions: CouchDBBulkDocRev
-    var doc: [String:AnyObject]?
+    var doc: [String: AnyObject]?
     
 //    public init(docRev: CouchDBDocRev, revisions:CouchDBBulkDocRev, doc: [String:AnyObject]?) {
 //        self.docRev = docRev
@@ -30,25 +30,23 @@ public class CouchDBBulkDoc {
 //        self.doc = doc
 //    }
     
-    public init(docRev: CouchDBDocRev, doc: [String:AnyObject]?) {
+    public init(docRev: CouchDBDocRev, doc: [String: AnyObject]?) {
         self.docRev = docRev
         self.doc = doc
     }
     
     func toDictionary() -> [String: AnyObject] {
-        var dict: [String: AnyObject] = [String: AnyObject]();
+        var dict: [String: AnyObject] = [String: AnyObject]()
         dict["_id"] = self.docRev.docId as AnyObject
         dict["_rev"] = self.docRev.revision as AnyObject
         // TODO: this is not set up properly right now - not sure if even required
         //dict["_revisions"] = self.revisions.toDictionary()
-        if (self.doc != nil) {
-            for key in self.doc!.keys {
-                if (dict[key] != nil) {
-                    dict["_\(key)"] = self.doc![key]
-                }
-                else {
-                    dict[key] = self.doc![key]
-                }
+        guard let doc = self.doc else { return dict }
+        for key in doc.keys {
+            if dict[key] != nil {
+                dict["_\(key)"] = doc[key]
+            } else {
+                dict[key] = doc[key]
             }
         }
         return dict

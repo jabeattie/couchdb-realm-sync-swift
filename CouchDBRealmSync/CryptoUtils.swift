@@ -10,18 +10,18 @@ import CryptoSwift
 import Foundation
 
 public class CryptoUtils {
-    
-    static let SHA1_DIGEST_LENGTH = 20
-    
+
+    static let sha1DigestLength = 20
+
     public static func sha1(input: Data) -> String {
         let hash = input.bytes.sha1()
-        return hexStringFromData(input: Data(bytes: hash, count: SHA1_DIGEST_LENGTH))
+        return hexStringFromData(input: Data(bytes: hash, count: sha1DigestLength))
     }
     
     private static func hexStringFromData(input: Data) -> String {
         var hexString = ""
         for byte in input.bytes {
-            hexString += String(format:"%02x", UInt8(byte))
+            hexString += String(format: "%02x", UInt8(byte))
         }
         return hexString
     }

@@ -14,7 +14,7 @@ import RealmSwift
  One instance of this object is stored in Realm
  for each Realm object type that has been registered for replication.
  */
-class RealmObjectCouchDBSequence : Object {
+class RealmObjectCouchDBSequence: Object {
     
     @objc dynamic var realmObjectType: String?
     @objc dynamic var realmObjectReplicatorId: String = UUID().uuidString

@@ -27,7 +27,6 @@ class RealmObjectCouchDBSequenceTracker {
                 for obj in results {
                     completionHandler(obj)
                 }
-                break
             case .update(let results, _, let insertions, let modifications):
                 for idx in insertions {
                     completionHandler(results[idx])
@@ -35,35 +34,35 @@ class RealmObjectCouchDBSequenceTracker {
                 for idx in modifications {
                     completionHandler(results[idx])
                 }
-                break
             case .error(let err):
                 fatalError("\(err)")
             }
         }
-        if (results.count == 0) {
+        if results.count == 0 {
             let realmLastSeq = RealmObjectCouchDBSequence(realmObjectType: "\(realmObjectType)", lastPushSequence: Int64(0), lastPullSequence: nil)
-            try! realm.write {
+            try? realm.write {
                 realm.add(realmLastSeq)
             }
         }
     }
     
     func stop(realm: Realm) {
-        if (self.notificationToken != nil) {
-            self.notificationToken?.invalidate()
-            self.notificationToken = nil
-        }
+        guard self.notificationToken != nil else { return }
+        self.notificationToken?.invalidate()
+        self.notificationToken = nil
     }
     
     func updateLastPushSequence(realm: Realm, lastPushSequence: Int64) {
         guard let results = realm.object(ofType: RealmObjectCouchDBSequence.self, forPrimaryKey: self.realmObjectType) else {
-            let realmLastSeq = RealmObjectCouchDBSequence(realmObjectType: "\(self.realmObjectType)", lastPushSequence: lastPushSequence, lastPullSequence: nil)
-            try! realm.write {
+            let realmLastSeq = RealmObjectCouchDBSequence(realmObjectType: "\(self.realmObjectType)",
+                lastPushSequence: lastPushSequence,
+                lastPullSequence: nil)
+            try? realm.write {
                 realm.add(realmLastSeq)
             }
             return
         }
-        try! realm.write {
+        try? realm.write {
             results.lastPushSequence = lastPushSequence
             realm.add(results)
         }
@@ -71,13 +70,15 @@ class RealmObjectCouchDBSequenceTracker {
     
     func updateLastPullSequence(realm: Realm, lastPullSequence: String) {
         guard let results = realm.object(ofType: RealmObjectCouchDBSequence.self, forPrimaryKey: self.realmObjectType) else {
-            let realmLastSeq = RealmObjectCouchDBSequence(realmObjectType: "\(self.realmObjectType)", lastPushSequence: Int64(0), lastPullSequence: lastPullSequence)
-            try! realm.write {
+            let realmLastSeq = RealmObjectCouchDBSequence(realmObjectType: "\(self.realmObjectType)",
+                lastPushSequence: Int64(0),
+                lastPullSequence: lastPullSequence)
+            try? realm.write {
                 realm.add(realmLastSeq)
             }
             return
         }
-        try! realm.write {
+        try? realm.write {
             results.lastPullSequence = lastPullSequence
             realm.add(results)
         }

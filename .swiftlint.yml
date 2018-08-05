@@ -1,0 +1,14 @@
+disabled_rules:
+    - trailing_whitespace
+opt_in_rules:
+    - force_unwrapping
+excluded:
+    - Carthage
+
+line_length: 
+    warning: 150
+    error: 150
+
+identifier_name:
+    min_length:
+        warning: 2

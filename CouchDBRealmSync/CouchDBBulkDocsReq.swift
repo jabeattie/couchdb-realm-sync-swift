@@ -23,7 +23,7 @@ public class CouchDBBulkDocsReq {
 
     var docs: [CouchDBBulkDoc]
     
-    public init(docs:[CouchDBBulkDoc]) {
+    public init(docs: [CouchDBBulkDoc]) {
         self.docs = docs
     }
     
@@ -32,11 +32,9 @@ public class CouchDBBulkDocsReq {
         for doc in self.docs {
             docDicts.append(doc.toDictionary())
         }
-        var dict:[String: AnyObject] = [String: AnyObject]();
+        var dict: [String: AnyObject] = [String: AnyObject]()
         dict["new_edits"] = false as AnyObject
         dict["docs"] = docDicts as AnyObject
         return dict
     }
-    
-
 }

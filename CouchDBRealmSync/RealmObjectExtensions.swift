@@ -11,7 +11,7 @@ import RealmSwift
 
 extension Object {
     
-    func toDictionary() -> [String:AnyObject] {
+    func toDictionary() -> [String: AnyObject] {
         let properties = self.objectSchema.properties.map { $0.name }
         let dictionary = self.dictionaryWithValues(forKeys: properties)
         
@@ -33,7 +33,7 @@ extension Object {
             
         }
         
-        var dict = [String:AnyObject]()
+        var dict = [String: AnyObject]()
         for key in mutabledic.allKeys {
             if let keyStr = key as? String {
                 dict[keyStr] = mutabledic.object(forKey: keyStr) as AnyObject
@@ -42,24 +42,24 @@ extension Object {
         return dict
     }
     
-    func updateFromDictionary(dict: [String:AnyObject]) {
+    func updateFromDictionary(dict: [String: AnyObject]) {
         let primaryKey = type(of: self).primaryKey()
         var primaryKeyExists = false
-        if (primaryKey != nil) {
-            primaryKeyExists = (self.value(forKey: primaryKey!) != nil)
+        if let pk = primaryKey {
+            primaryKeyExists = self.value(forKey: pk) != nil
         }
         for prop in self.objectSchema.properties {
             if let value = dict[prop.name] {
-                if let nestedObjectDict = value as? [String:AnyObject] {
+                if let nestedObjectDict = value as? [String: AnyObject] {
                     var nestedObjectIsNew = false
                     var nestedObject = self[prop.name] as? Object
-                    if (nestedObject == nil && prop.objectClassName != nil) {
-                        nestedObject = Object.objectClassFromString(className: prop.objectClassName!)
+                    if nestedObject == nil, let objectClassName = prop.objectClassName {
+                        nestedObject = Object.objectClassFromString(className: objectClassName)
                         nestedObjectIsNew = true
                     }
-                    if (nestedObject != nil) {
-                        nestedObject!.updateFromDictionary(dict: nestedObjectDict)
-                        if (nestedObjectIsNew) {
+                    if let nestedObject = nestedObject {
+                        nestedObject.updateFromDictionary(dict: nestedObjectDict)
+                        if nestedObjectIsNew {
                             self.setValue(nestedObject, forKey: prop.name)
                         }
                     }
@@ -67,13 +67,12 @@ extension Object {
 //                    // TODO:
 //                }
                 } else {
-                    if (prop.name == primaryKey) {
-                        if (primaryKeyExists == false) {
+                    if prop.name == primaryKey {
+                        if primaryKeyExists == false {
                             primaryKeyExists = true
                             self.setValue(value, forKey: prop.name)
                         }
-                    }
-                    else {
+                    } else {
                         self.setValue(value, forKey: prop.name)
                     }
                 }
@@ -83,18 +82,15 @@ extension Object {
     
     class func objectClassFromString(className: String) -> Object? {
         var clazz = NSClassFromString(className) as? Object.Type
-        if (clazz == nil) {
+        if clazz == nil {
             // get the project name
             if let appName = Bundle.main.infoDictionary?["CFBundleName"] as? String {
                 let classStringName = "\(appName).\(className)"
                 clazz = NSClassFromString(classStringName) as? Object.Type
             }
         }
-        if (clazz != nil) {
-            return clazz!.init()
-        } else {
-            return nil
-        }
+        guard let safeClass = clazz else { return nil }
+        return safeClass.init()
     }
     
 }

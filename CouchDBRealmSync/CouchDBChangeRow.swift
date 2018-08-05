@@ -14,19 +14,18 @@ public class CouchDBChangeRow {
     var id: String
     var changes: [String]
     var deleted: Bool
-    var doc: [String:AnyObject]?
+    var doc: [String: AnyObject]?
     
-    public init(dict:[String:AnyObject]) {
-        self.seq = dict["seq"] as! String
-        self.id = dict["id"] as! String
+    public init(dict: [String: AnyObject]) {
+        self.seq = dict["seq"] as? String ?? ""
+        self.id = dict["id"] as? String ?? ""
         self.deleted = dict["deleted"] as? Bool ?? false
-        self.doc = dict["doc"] as? [String:AnyObject]
+        self.doc = dict["doc"] as? [String: AnyObject]
         self.changes = [String]()
-        let changesArray = dict["changes"] as? [[String:AnyObject]]
-        if (changesArray != nil) {
-            for changesDict in changesArray! {
-                self.changes.append(changesDict["rev"] as! String)
-            }
+        guard let changesArray = dict["changes"] as? [[String: AnyObject]] else { return }
+        for changesDict in changesArray {
+            guard let change = changesDict["rev"] as? String else { continue }
+            self.changes.append(change)
         }
     }
     

@@ -15,7 +15,7 @@ public class CouchDBDocRev {
     var deleted: Bool
     
     init(docId: String, revision: String, deleted: Bool) {
-        self.docId = docId;
+        self.docId = docId
         self.revision = revision
         self.deleted = deleted
     }

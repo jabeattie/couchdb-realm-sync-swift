@@ -9,7 +9,7 @@
 import Foundation
 
 public enum CouchDBError: Error {
-    case EmptyResponse
+    case emptyResponse
 }
 
 public class CouchDBClient {
@@ -44,8 +44,7 @@ public class CouchDBClient {
                 } else {
                     completionHandler(nil, nil)
                 }
-            }
-            catch {
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -60,22 +59,19 @@ public class CouchDBClient {
             let body = try JSONSerialization.data(withJSONObject: bulkDocRequest.toDictionary(), options: [])
             let session = URLSession.shared
             let request = self.createPostRequest(db: db, path: "_bulk_docs", body: body)
-            let task = session.dataTask(with: request) {
-                (data, response, err) in
+            let task = session.dataTask(with: request) { (data, response, err) in
                 do {
                     guard let array = try self.parseResponseAsArray(data: data, response: response, error: err) else {
                         completionHandler(nil, nil)
                         return
                     }
                     completionHandler(array, nil)
-                }
-                catch {
+                } catch {
                     completionHandler(nil, error)
                 }
             }
             task.resume()
-        }
-        catch {
+        } catch {
             completionHandler(nil, error)
         }
     }
@@ -84,21 +80,19 @@ public class CouchDBClient {
     
     public func getChanges(db: String, since: String?, includeDocs: Bool, completionHandler: @escaping (CouchDBChanges?, Error?) -> Void) {
         var path = "_changes?include_docs=\(includeDocs)"
-        if (since != nil) {
-            path = "\(path)&since=\(since!)"
+        if let since = since {
+            path = "\(path)&since=\(since)"
         }
         let session = URLSession.shared
         let request = self.createGetRequest(db: db, path: path)
-        let task = session.dataTask(with: request) {
-            (data, response, err) in
+        let task = session.dataTask(with: request) { (data, response, err) in
             do {
                 guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
                     completionHandler(nil, nil)
                     return
                 }
                 completionHandler(CouchDBChanges(dict: dict), nil)
-            }
-            catch {
+            } catch {
                 completionHandler(nil, error)
             }
         }
@@ -109,11 +103,10 @@ public class CouchDBClient {
     
     public func saveCheckpoint(db: String, replicationId: String, lastSequence: Int64, completionHandler: @escaping (Error?) -> Void) {
         do {
-            let body = try JSONSerialization.data(withJSONObject: ["lastSequence":"\(lastSequence)"], options: [])
+            let body = try JSONSerialization.data(withJSONObject: ["lastSequence": "\(lastSequence)"], options: [])
             let session = URLSession.shared
             let request = self.createPutRequest(db: db, path: "_local/\(replicationId)", body: body)
-            let task = session.dataTask(with: request) {
-                (data, response, err) in
+            let task = session.dataTask(with: request) { (data, response, err) in
                 do {
                     guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
                         completionHandler(nil)
@@ -134,8 +127,7 @@ public class CouchDBClient {
     public func getCheckpoint(db: String, replicationId: String, completionHandler: @escaping (Int64?, Error?) -> Void) {
         let session = URLSession.shared
         let request = self.createGetRequest(db: db, path: "_local/\(replicationId)")
-        let task = session.dataTask(with: request) {
-            (data, response, err) in
+        let task = session.dataTask(with: request) { (data, response, err) in
             do {
                 guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
                     completionHandler(nil, nil)
@@ -155,15 +147,14 @@ public class CouchDBClient {
     
     public func revsDiff(db: String, docRevs: [CouchDBDocRev], completionHandler: @escaping ([CouchDBDocMissingRevs]?, Error?) -> Void) {
         do {
-            var dict = [String:[String]]()
+            var dict = [String: [String]]()
             for docRev in docRevs {
                 dict[docRev.docId] = [docRev.revision]
             }
             let body = try JSONSerialization.data(withJSONObject: dict, options: [])
             let session = URLSession.shared
             let request = self.createPostRequest(db: db, path: "_revs_diff", body: body)
-            let task = session.dataTask(with: request) {
-                (data, response, err) in
+            let task = session.dataTask(with: request) { (data, response, err) in
                 do {
                     guard let dict = try self.parseResponse(data: data, response: response, error: err) else {
                         completionHandler([], nil)
@@ -174,14 +165,12 @@ public class CouchDBClient {
                         return CouchDBDocMissingRevs(docId: $0.key, missingRevs: missingRevs)
                     })
                     completionHandler(docMissingRevs, nil)
-                }
-                catch {
+                } catch {
                     completionHandler(nil, error)
                 }
             }
             task.resume()
-        }
-        catch {
+        } catch {
             completionHandler(nil, error)
         }
     }
@@ -189,39 +178,40 @@ public class CouchDBClient {
     // MARK: Helper Functions
     
     func createGetRequest(db: String, path: String) -> URLRequest {
-        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
-        var request = URLRequest(url: url!)
-        request.addValue(" as URLapplication/json", forHTTPHeaderField:"Content-Type")
-        request.addValue("application/json", forHTTPHeaderField:"Accepts")
+        guard let url = URL(string: "\(self.baseUrl)/\(db)/\(path)") else { fatalError("Couldn't create a url") }
+        var request = URLRequest(url: url)
+        request.addValue(" as URLapplication/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accepts")
         request.httpMethod = "GET"
-        if (self.username != nil && self.password != nil) {
-            let loginString = "\(self.username!):\(self.password!)"
-            let loginData: Data? = loginString.data(using: .utf8)
-            let base64LoginString = loginData!.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
-            request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+        if let userName = self.username, let password = self.password {
+            let loginString = "\(userName):\(password)"
+            if let loginData = loginString.data(using: .utf8) {
+                let base64LoginString = loginData.base64EncodedString(options: Data.Base64EncodingOptions.lineLength64Characters)
+                request.setValue("Basic \(base64LoginString)", forHTTPHeaderField: "Authorization")
+            }
         }
         return request
     }
     
     func createPostRequest(db: String, path: String, body: Data?) -> URLRequest {
-        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
-        var request = URLRequest(url: url!)
-        request.addValue("application/json", forHTTPHeaderField:"Content-Type")
-        request.addValue("application/json", forHTTPHeaderField:"Accepts")
+        guard let url = URL(string: "\(self.baseUrl)/\(db)/\(path)") else { fatalError("Couldn't create a url") }
+        var request = URLRequest(url: url)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accepts")
         request.httpMethod = "POST"
-        if (body != nil) {
+        if body != nil {
             request.httpBody = body
         }
         return request
     }
     
     func createPutRequest(db: String, path: String, body: Data?) -> URLRequest {
-        let url = URL(string: "\(self.baseUrl)/\(db)/\(path)")
-        var request = URLRequest(url: url!)
-        request.addValue("application/json", forHTTPHeaderField:"Content-Type")
-        request.addValue("application/json", forHTTPHeaderField:"Accepts")
+        guard let url = URL(string: "\(self.baseUrl)/\(db)/\(path)") else { fatalError("Couldn't create a url") }
+        var request = URLRequest(url: url)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("application/json", forHTTPHeaderField: "Accepts")
         request.httpMethod = "PUT"
-        if (body != nil) {
+        if body != nil {
             request.httpBody = body
         }
         return request
@@ -232,7 +222,7 @@ public class CouchDBClient {
             throw err
         }
         guard let data = data else {
-            throw CouchDBError.EmptyResponse
+            throw CouchDBError.emptyResponse
         }
         return try JSONSerialization.jsonObject(with: data, options: []) as? [String: AnyObject]
     }
@@ -242,7 +232,7 @@ public class CouchDBClient {
             throw err
         }
         guard let data = data else {
-            throw CouchDBError.EmptyResponse
+            throw CouchDBError.emptyResponse
         }
         return try JSONSerialization.jsonObject(with: data, options: []) as? [AnyObject]
     }

@@ -17,5 +17,4 @@ class RealmObjectChanges {
         self.lastSequence = lastSequence
         self.realmDocMaps = realmDocMaps
     }
-    
 }

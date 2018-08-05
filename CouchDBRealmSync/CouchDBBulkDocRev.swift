@@ -24,7 +24,7 @@ public class CouchDBBulkDocRev {
     }
     
     func toDictionary() -> [String: AnyObject] {
-        var dict:[String: AnyObject] = [String: AnyObject]();
+        var dict: [String: AnyObject] = [String: AnyObject]()
         dict["start"] = NSNumber(value: self.start)
         dict["ids"] = self.ids as AnyObject
         return dict

@@ -13,7 +13,7 @@ import RealmSwift
  One instance of this class is stored in Realm
  for each Realm object that is being tracked for replication.
  */
-class RealmObjectCouchDBDocMap : Object {
+class RealmObjectCouchDBDocMap: Object {
     
     @objc dynamic var realmObjectType: String?
     @objc dynamic var realmObjectId: String?
@@ -23,7 +23,7 @@ class RealmObjectCouchDBDocMap : Object {
     
     convenience init(realmObjectType: String, realmObjectId: String, couchDocId: String, couchRev: String, couchSequence: Int64) {
         self.init()
-        self.realmObjectType = realmObjectType;
+        self.realmObjectType = realmObjectType
         self.realmObjectId = realmObjectId
         self.couchDocId = couchDocId
         self.couchRev = couchRev

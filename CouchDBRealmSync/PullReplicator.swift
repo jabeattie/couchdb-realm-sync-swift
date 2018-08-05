@@ -26,7 +26,7 @@ public class PullReplicator<T: Object> : Replicator {
     }
     
     public func getReplicatorId() throws -> String {
-        var dict: [String:String] = [String:String]();
+        var dict: [String: String] = [String: String]()
         dict["source"] = self.source.description
         dict["target"] = self.replicationMgr.getRealmObjectReplicatorId(realmObjectMgr: self.realmObjectMgr)
         let jsonData = try JSONSerialization.data(withJSONObject: dict, options: [])
@@ -40,24 +40,23 @@ public class PullReplicator<T: Object> : Replicator {
         let checkpoint = self.replicationMgr.localCheckpoint(realmObjectMgr: self.realmObjectMgr, replicatorId: replicatorId)
         self.couchClient.getChanges(db: self.source.db, since: checkpoint, includeDocs: true) { (changes, error) in
             DispatchQueue.main.async {
-                if (error != nil) {
+                if error != nil {
                     self.replicationFailed(error: error, errorMessage: "Error getting changes from CouchDB")
-                }
-                else if (changes == nil) {
-                    self.replicationComplete(changesProcessed: 0)
-                }
-                else {
-                    let missingDocs = self.replicationMgr.localRevsDiff(realmObjectMgr: self.realmObjectMgr, changes: changes!)
-                    if (missingDocs.count > 0) {
-                        do {
-                            let changesProcessed = try self.replicationMgr.localBulkInsert(realmObjectMgr: self.realmObjectMgr, docs: missingDocs)
-                            self.replicationMgr.saveLocalCheckPoint(realmObjectMgr: self.realmObjectMgr, sequence: changes!.lastSequence!)
-                            self.replicationComplete(changesProcessed: changesProcessed)
-                        }
-                        catch {
-                            self.replicationFailed(error: error, errorMessage: "Error updating documents")
-                        }
+                } else if let chgs = changes {
+                    let missingDocs = self.replicationMgr.localRevsDiff(realmObjectMgr: self.realmObjectMgr, changes: chgs)
+                    guard missingDocs.count > 0, let lastSequence = chgs.lastSequence else {
+                        self.replicationComplete(changesProcessed: 0)
+                        return
                     }
+                    do {
+                        let changesProcessed = try self.replicationMgr.localBulkInsert(realmObjectMgr: self.realmObjectMgr, docs: missingDocs)
+                        self.replicationMgr.saveLocalCheckPoint(realmObjectMgr: self.realmObjectMgr, sequence: lastSequence)
+                        self.replicationComplete(changesProcessed: changesProcessed)
+                    } catch {
+                        self.replicationFailed(error: error, errorMessage: "Error updating documents")
+                    }
+                } else {
+                    self.replicationComplete(changesProcessed: 0)
                 }
             }
         }
